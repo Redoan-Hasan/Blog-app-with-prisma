@@ -108,8 +108,46 @@ const getPostById = async (id: number) => {
   });
 };
 
+const getPostStats = async () => {
+  return await prisma.$transaction(async (tx) => {
+    const stats = await tx.post.aggregate({
+      _count: true,
+      _avg: { views: true },
+      _max: { views: true },
+      _min: { views: true },
+      _sum: {views: true},
+    });
+    const featuredCount = await tx.post.count({
+      where: { isFeatured: true },
+    });
+    const last7DaysPosts = await tx.post.count({
+      where: {
+        createdAt: {
+          gte: new Date(new Date().setDate(new Date().getDate() - 7)),
+        },
+      },
+    });
+    return {
+      stats: {
+        totalPosts: stats._count,
+        avgViews: stats._avg.views,
+        maxViews: stats._max.views,
+        minViews: stats._min.views,
+        sumViews: stats._sum.views,
+      },
+      featured:{
+        count : featuredCount,
+      },
+      last7Days:{
+        count:last7DaysPosts,
+      }
+    };
+  });
+};
+
 export const postServices = {
   createPost,
   getAllPosts,
   getPostById,
+  getPostStats,
 };

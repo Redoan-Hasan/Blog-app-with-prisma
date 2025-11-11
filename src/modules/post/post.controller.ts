@@ -62,8 +62,25 @@ const getPostById = async (req: Request, res: Response) => {
     });
   }
 };
+
+const getPostStats = async (req: Request, res: Response) => {
+  try {
+    const result = await postServices.getPostStats();
+    res.status(200).json({
+      success: true,
+      message: "Post statistics fetched successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
 export const postController = {
   createPost,
   getAllPosts,
   getPostById,
+  getPostStats,
 };
